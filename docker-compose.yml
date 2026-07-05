@@ -1,0 +1,23 @@
+services:
+  immich-machine-learning:
+    image: ghcr.io/immich-app/immich-machine-learning:release-cuda
+    container_name: immich-machine-learning
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    ports:
+      - "3003:3003"
+    volumes:
+      - ml_cache:/cache
+    restart: unless-stopped
+
+  # Add future project services here, e.g.:
+  # some-other-project-ml:
+  #   image: ...
+  #   runtime: nvidia
+  #   ports:
+  #     - "3004:3004"
+
+volumes:
+  ml_cache:
+    driver: local
