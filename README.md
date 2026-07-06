@@ -1,6 +1,6 @@
 # gpu-ml
 
-Shared GPU-accelerated inference services for home network projects, running on a device with an NVIDIA GPU (currently a GTX 1070). Kept as its own repo, separate from any single client project, because it's expected to serve multiple projects over time.
+Shared GPU-accelerated inference services for home network projects, running on a device with an NVIDIA GPU (currently a GTX 1060, 6GB VRAM). Kept as its own repo, separate from any single client project, because it's expected to serve multiple projects over time.
 
 ## Current services
 
