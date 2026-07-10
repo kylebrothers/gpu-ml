@@ -11,6 +11,18 @@ services:
       - ml_cache:/cache
     restart: unless-stopped
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    restart: unless-stopped
+
   # Add future project services here, e.g.:
   # some-other-project-ml:
   #   image: ...
@@ -20,4 +32,6 @@ services:
 
 volumes:
   ml_cache:
+    driver: local
+  ollama_models:
     driver: local
