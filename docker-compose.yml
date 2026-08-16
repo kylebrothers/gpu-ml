@@ -23,6 +23,24 @@ services:
       - ollama_models:/root/.ollama
     restart: unless-stopped
 
+  # Generic task-based inference service (see inference-service/app.py for
+  # the protocol). First task: object_detect (YOLO-World), used by
+  # photo-search's sidecar/enrichment/object_detect.py. Designed to host
+  # future tasks (dense captioning, DELF/DELG landmark embeddings, or
+  # models for other projects entirely) without a new service per model --
+  # see inference-service/tasks/__init__.py to add one.
+  inference-service:
+    build: ./inference-service
+    container_name: inference-service
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    ports:
+      - "3005:3005"
+    volumes:
+      - inference_model_cache:/root/.cache   # model weights, so they aren't re-downloaded on every rebuild
+    restart: unless-stopped
+
   # Add future project services here, e.g.:
   # some-other-project-ml:
   #   image: ...
@@ -34,4 +52,6 @@ volumes:
   ml_cache:
     driver: local
   ollama_models:
+    driver: local
+  inference_model_cache:
     driver: local

@@ -1,0 +1,13 @@
+flask==3.1.0
+gunicorn==23.0.0
+ultralytics==8.3.40
+Pillow==11.0.0
+
+# torch is a dependency of ultralytics and will be pulled in automatically.
+# On this device (GTX 1060, Pascal architecture, compute capability 6.1),
+# verify the resolved torch build actually supports this GPU before relying
+# on CUDA acceleration -- newer PyTorch releases have occasionally dropped
+# support for older compute capabilities. If `torch.cuda.is_available()`
+# returns False at runtime (see tasks/object_detect.py's startup log), the
+# task falls back to CPU automatically but will be much slower; pin an
+# explicit compatible torch/CUDA version here if that happens.
