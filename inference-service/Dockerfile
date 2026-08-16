@@ -1,12 +1,22 @@
 # Base image ships Python + PyTorch + CUDA/cuDNN preinstalled, avoiding a
 # hand-matched torch-wheel-to-CUDA-version installation (a common source of
-# GPU-not-detected bugs). UNVERIFIED, flag for Kyle to confirm before first
-# build: this CUDA version (12.4) must be compatible with the actual NVIDIA
-# driver installed on the gpu-ml host -- check with `nvidia-smi` on that
-# device (top-right "CUDA Version" is the max supported by the driver, must
-# be >= this image's CUDA version) before building. If incompatible, switch
-# to a pytorch/pytorch tag with an older cuda## suffix that fits.
+# GPU-not-detected bugs). Confirmed compatible 2026-08: gpu-ml's driver
+# supports CUDA 13.0 (via nvidia-smi), well above this image's CUDA 12.4.
 FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
+
+# ultralytics depends on opencv-python (the GUI-capable build), which needs
+# X11 shared libraries this minimal PyTorch runtime image doesn't include
+# (it's built for headless training/inference, no GUI stack). Without
+# these, importing ultralytics fails at container startup with
+# "ImportError: libxcb.so.1: cannot open shared object file" -- confirmed
+# via a live crash 2026-08. libgl1/libglib2.0-0/libsm6/libxext6/
+# libxrender1/libxcb1 is the standard set opencv-python's shared-library
+# loading needs on a Debian-based image; none of these pull in an actual
+# GUI/display stack, they're just the .so files the import machinery checks
+# for even in headless use.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 libglib2.0-0 libsm6 libxext6 libxrender1 libxcb1 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
