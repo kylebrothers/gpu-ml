@@ -4,18 +4,20 @@
 # supports CUDA 13.0 (via nvidia-smi), well above this image's CUDA 12.4.
 FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
 
-# ultralytics depends on opencv-python (the GUI-capable build), which needs
-# X11 shared libraries this minimal PyTorch runtime image doesn't include
-# (it's built for headless training/inference, no GUI stack). Without
-# these, importing ultralytics fails at container startup with
-# "ImportError: libxcb.so.1: cannot open shared object file" -- confirmed
-# via a live crash 2026-08. libgl1/libglib2.0-0/libsm6/libxext6/
-# libxrender1/libxcb1 is the standard set opencv-python's shared-library
-# loading needs on a Debian-based image; none of these pull in an actual
-# GUI/display stack, they're just the .so files the import machinery checks
-# for even in headless use.
+# libgl1/libglib2.0-0/libsm6/libxext6/libxrender1/libxcb1: ultralytics
+# depends on opencv-python (the GUI-capable build), which needs these X11
+# shared libraries even for headless use -- this minimal PyTorch runtime
+# image doesn't include them by default. Without them, importing
+# ultralytics fails at container startup with "ImportError: libxcb.so.1:
+# cannot open shared object file" -- confirmed via a live crash 2026-08.
+#
+# git: needed for `pip install git+https://github.com/openai/CLIP.git` in
+# requirements.txt (YOLO-World's set_classes() requires real OpenAI CLIP,
+# not the unrelated PyPI package literally named "clip" -- confirmed via a
+# live "No module named 'clip'" failure, 2026-08). pip needs the git binary
+# on the system to clone that URL during install.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1 libglib2.0-0 libsm6 libxext6 libxrender1 libxcb1 \
+    libgl1 libglib2.0-0 libsm6 libxext6 libxrender1 libxcb1 git \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
