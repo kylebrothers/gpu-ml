@@ -3,6 +3,19 @@ gunicorn==23.0.0
 ultralytics==8.3.40
 Pillow==11.0.0
 
+# YOLO-World's set_classes() requires OpenAI's real CLIP package internally
+# (a text encoder for embedding class-name prompts) -- confirmed via
+# Ultralytics' own source (ultralytics/nn/tasks.py, WorldModel.set_classes)
+# after a live "No module named 'clip'" failure, 2026-08. Must be this git
+# URL specifically: the bare PyPI package named "clip" is a different,
+# unrelated project and would silently install the wrong thing. Downloads
+# CLIP's ViT-B/32 weights to ~/.cache/clip on first real set_classes() call
+# (needs internet access at that point) -- persisted via the same
+# inference_model_cache volume mount already used for YOLO-World's weights
+# (see docker-compose.yml), so this only happens once, not on every
+# container restart.
+git+https://github.com/openai/CLIP.git
+
 # torch is a dependency of ultralytics and will be pulled in automatically.
 # On this device (GTX 1060, Pascal architecture, compute capability 6.1),
 # verify the resolved torch build actually supports this GPU before relying
